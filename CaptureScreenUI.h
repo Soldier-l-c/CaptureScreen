@@ -13,8 +13,7 @@ class QtGuiApplication3 : public QMainWindow
 {
 	Q_OBJECT
 
-	using BMInfo =
-	struct _BMInfo 
+	using BMInfo = struct 
 	{
 		BOOL			truecolour;
 		BITMAPINFO		bmi;
@@ -25,6 +24,7 @@ class QtGuiApplication3 : public QMainWindow
 public:
 	QtGuiApplication3(QWidget *parent = Q_NULLPTR);
 	~QtGuiApplication3();
+
 protected:
 	bool __CaptureRect(const QSize& rect);
 	void __InitDC();
@@ -35,18 +35,17 @@ signals:
 
 public slots:
 	void Update();
+
 private:
 	Ui::QtGuiApplication3Class ui;
 	BMInfo	m_bminfo;
 
-	HDC		m_hmemdc;
-	HDC		m_hrootdc_Desktop;
-	HBITMAP	m_membitmap;
-	void*	m_DIBbits;
+	HDC		m_hmemdc{ nullptr };
+	HDC		m_hrootdc_Desktop{ nullptr };
+	HBITMAP	m_membitmap{ nullptr };
 
 	std::atomic_bool m_bRun{ true };
 	std::shared_ptr<std::thread> m_spThread;
-
 
 	std::mutex m_mBitMap;
 };

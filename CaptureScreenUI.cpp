@@ -21,7 +21,6 @@ QtGuiApplication3::QtGuiApplication3(QWidget* parent)
 	m_spThread = std::make_shared<std::thread>
 		([this]
 		{
-			Sleep(1000);
 			while (m_bRun)
 			{
 				Sleep(30);
@@ -45,9 +44,7 @@ void QtGuiApplication3::__InitDC()
 {
 	m_hrootdc_Desktop = GetDC(NULL);
 	m_hmemdc = CreateCompatibleDC(m_hrootdc_Desktop);
-	m_membitmap = CreateCompatibleBitmap(m_hrootdc_Desktop, 
-		WIDTH_FREAM,
-		HEIGHT_FREAM);
+	m_membitmap = CreateCompatibleBitmap(m_hrootdc_Desktop, WIDTH_FREAM, HEIGHT_FREAM);
 }
 
 void QtGuiApplication3::__InitBminFo()
@@ -82,7 +79,7 @@ bool QtGuiApplication3::__CaptureRect(const QSize& rect)
 {
 	std::lock_guard<std::mutex>lock(m_mBitMap);
 
-	(HBITMAP)SelectObject(m_hmemdc, m_membitmap);
+	SelectObject(m_hmemdc, m_membitmap);
 
 	const BOOL blitok = BitBlt(m_hmemdc, 0, 0, rect.width(), rect.height(),
 		m_hrootdc_Desktop,
