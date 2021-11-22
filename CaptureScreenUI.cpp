@@ -1,35 +1,47 @@
 #include "CaptureScreenUI.h"
 #include <QtWin>
-#include <iostream>
-#include <thread>
 #include <QApplication>
 #include <qdesktopwidget.h>
 
 #define WIDTH_FREAM 640 //QApplication::desktop()->availableGeometry().width()
 #define HEIGHT_FREAM 640 //QApplication::desktop()->availableGeometry().height()
 
-#define SCREEN_OFF_SETX 0
-#define SCREEN_OFF_SETY 0
+#define SCREEN_OFF_SETX 200
+#define SCREEN_OFF_SETY 200
+
 QtGuiApplication3::QtGuiApplication3(QWidget* parent)
 	: QMainWindow(parent, Qt::WindowStaysOnTopHint)
 {
 	ui.setupUi(this);
 	connect(this, &QtGuiApplication3::UpdateFream, this, &QtGuiApplication3::Update);
-	InitDC();
-	std::thread([this] 
+
+	__InitDC();
+	__InitBminFo();
+
+	m_spThread = std::make_shared<std::thread>
+		([this]
 		{
 			Sleep(1000);
-			while (true)
+			while (m_bRun)
 			{
-				CaptureRect({ WIDTH_FREAM, HEIGHT_FREAM });
 				Sleep(30);
+				__CaptureRect({ WIDTH_FREAM, HEIGHT_FREAM });
 				emit UpdateFream();
 			}
-		}).detach();
-	InitBminFo();
+		});
 }
 
-void QtGuiApplication3::InitDC()
+QtGuiApplication3::~QtGuiApplication3()
+{
+	m_bRun = false;
+
+	if (m_spThread)
+	{
+		m_spThread->join();
+	}
+}
+
+void QtGuiApplication3::__InitDC()
 {
 	m_hrootdc_Desktop = GetDC(NULL);
 	m_hmemdc = CreateCompatibleDC(m_hrootdc_Desktop);
@@ -38,7 +50,7 @@ void QtGuiApplication3::InitDC()
 		HEIGHT_FREAM);
 }
 
-void QtGuiApplication3::InitBminFo()
+void QtGuiApplication3::__InitBminFo()
 {
 	memset(&m_bminfo, 0, sizeof(m_bminfo));
 	m_bminfo.bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -54,7 +66,11 @@ void QtGuiApplication3::InitBminFo()
 
 void QtGuiApplication3::Update()
 {
-	auto bkPixmap = QtWin::fromHBITMAP(m_membitmap);
+	QPixmap bkPixmap;
+	{
+		std::lock_guard<std::mutex>lock(m_mBitMap);
+		bkPixmap = std::move(QtWin::fromHBITMAP(m_membitmap));
+	}
 
 	this->resize(bkPixmap.size());
 	QPalette pal(palette());
@@ -62,8 +78,10 @@ void QtGuiApplication3::Update()
 	setPalette(pal);
 }
 
-bool QtGuiApplication3::CaptureRect(const QSize& rect)
+bool QtGuiApplication3::__CaptureRect(const QSize& rect)
 {
+	std::lock_guard<std::mutex>lock(m_mBitMap);
+
 	(HBITMAP)SelectObject(m_hmemdc, m_membitmap);
 
 	const BOOL blitok = BitBlt(m_hmemdc, 0, 0, rect.width(), rect.height(),
