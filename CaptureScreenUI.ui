@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QtGuiApplication3Class</class>
- <widget class="QMainWindow" name="QtGuiApplication3Class">
+ <class>CaptureScreenUI</class>
+ <widget class="QMainWindow" name="CaptureScreenUI">
   <property name="geometry">
    <rect>
     <x>0</x>

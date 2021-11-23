@@ -99,10 +99,10 @@
     <QtMoc Include="CaptureScreenUI.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="QtGuiApplication3.ui" />
+    <QtUic Include="CaptureScreenUI.ui" />
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="QtGuiApplication3.qrc" />
+    <QtRcc Include="CaptureScreenUI.qrc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

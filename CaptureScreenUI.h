@@ -6,12 +6,12 @@
 #include <iostream>
 #include <mutex>
 #include <thread>
-#include "ui_QtGuiApplication3.h"
+#include "ui_CaptureScreenUI.h"
 
 #define SCREEN_OFF_SETX 0
 #define SCREEN_OFF_SETY 0
 
-class QtGuiApplication3 : public QMainWindow
+class CaptureScreenUI : public QMainWindow
 {
 	Q_OBJECT
 
@@ -24,8 +24,8 @@ class QtGuiApplication3 : public QMainWindow
 	};
 
 public:
-	QtGuiApplication3(QWidget *parent = Q_NULLPTR);
-	~QtGuiApplication3();
+	CaptureScreenUI(QWidget *parent = Q_NULLPTR);
+	~CaptureScreenUI();
 
 protected:
 	bool __CaptureRect(const QSize& rect);
@@ -47,7 +47,7 @@ public slots:
 	void Update();
 
 private:
-	Ui::QtGuiApplication3Class ui;
+	Ui::CaptureScreenUI ui;
 	BMInfo	m_bminfo;
 
 	HDC		m_hmemdc{ nullptr };

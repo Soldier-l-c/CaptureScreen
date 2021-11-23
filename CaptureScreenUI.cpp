@@ -3,9 +3,10 @@
 #include <QApplication>
 #include <qdesktopwidget.h>
 #include <QMouseEvent>
-
+#include <qpushbutton.h>
 //#define CAPTURE_MOVED_WITH_MOUSE
 //#define MANGNIFYING
+//#define BUTTON_TO_CAPTURE
 
 #ifdef CAPTURE_MOVED_WITH_MOUSE
 #define WIDTH_FREAM 100 
@@ -21,13 +22,24 @@
 #define MANGINFY_SIZE 1
 #endif // MANGNIFYING
 
-QtGuiApplication3::QtGuiApplication3(QWidget* parent)
+CaptureScreenUI::CaptureScreenUI(QWidget* parent)
 	: QMainWindow(parent, Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint)
 {
 	ui.setupUi(this);
-	connect(this, &QtGuiApplication3::UpdateFream, this, &QtGuiApplication3::Update);
-
 	setStyleSheet("border:1px solid red;");
+
+#ifndef MANGNIFYING
+#ifdef BUTTON_TO_CAPTURE
+	QPushButton* b = new QPushButton("", this);
+	connect(b, &QPushButton::clicked, [this]() {__CaptureRect({ WIDTH_FREAM, HEIGHT_FREAM }); Update(); });
+	m_bRun = false;
+	this->resize(b->size());
+#else
+	connect(this, &CaptureScreenUI::UpdateFream, this, &CaptureScreenUI::Update);
+#endif // BUTTON_TO_CAPTURE
+#else
+	connect(this, &QtGuiApplication3::UpdateFream, this, &QtGuiApplication3::Update);
+#endif // ! MANGNIFYING
 
 	__InitDC();
 	__InitBminFo();
@@ -46,7 +58,7 @@ QtGuiApplication3::QtGuiApplication3(QWidget* parent)
 		});
 }
 
-QtGuiApplication3::~QtGuiApplication3()
+CaptureScreenUI::~CaptureScreenUI()
 {
 	m_bRun = false;
 
@@ -56,14 +68,14 @@ QtGuiApplication3::~QtGuiApplication3()
 	}
 }
 
-void QtGuiApplication3::__InitDC()
+void CaptureScreenUI::__InitDC()
 {
 	m_hrootdc_Desktop = GetDC(NULL);
 	m_hmemdc = CreateCompatibleDC(m_hrootdc_Desktop);
 	m_membitmap = CreateCompatibleBitmap(m_hrootdc_Desktop, WIDTH_FREAM, HEIGHT_FREAM);
 }
 
-void QtGuiApplication3::__InitBminFo()
+void CaptureScreenUI::__InitBminFo()
 {
 	memset(&m_bminfo, 0, sizeof(m_bminfo));
 	m_bminfo.bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -77,7 +89,7 @@ void QtGuiApplication3::__InitBminFo()
 	m_bminfo.truecolour = true;
 }
 
-void QtGuiApplication3::Update()
+void CaptureScreenUI::Update()
 {
 	QPixmap bkPixmap;
 	{
@@ -94,7 +106,7 @@ void QtGuiApplication3::Update()
 	setPalette(pal);
 }
 
-bool QtGuiApplication3::__CaptureRect(const QSize& rect)
+bool CaptureScreenUI::__CaptureRect(const QSize& rect)
 {
 	std::lock_guard<std::mutex>lock(m_mBitMap);
 
@@ -119,21 +131,21 @@ bool QtGuiApplication3::__CaptureRect(const QSize& rect)
 }
 
 
-bool QtGuiApplication3::__IsPointInDragnWidget(const QWidget* widget, const QPoint& point)
+bool CaptureScreenUI::__IsPointInDragnWidget(const QWidget* widget, const QPoint& point)
 {
 	//判断位置
 	QRect rect = widget->rect();
 	return widget->geometry().contains(this->mapFromGlobal(QCursor::pos()));
 }
 
-void QtGuiApplication3::mousePressEvent(QMouseEvent* event)
+void CaptureScreenUI::mousePressEvent(QMouseEvent* event)
 {
 	m_poPressedPoint = event->pos();		//触发鼠标按压事件的点
 	m_bIsMove = true;
 	QMainWindow::mousePressEvent(event);
 }
 
-void QtGuiApplication3::mouseMoveEvent(QMouseEvent* event)
+void CaptureScreenUI::mouseMoveEvent(QMouseEvent* event)
 {
 	if ((event->buttons() == Qt::LeftButton) && m_bIsMove == true)
 	{
@@ -143,13 +155,13 @@ void QtGuiApplication3::mouseMoveEvent(QMouseEvent* event)
 	QMainWindow::mouseMoveEvent(event);
 }
 
-void QtGuiApplication3::mouseReleaseEvent(QMouseEvent* event)
+void CaptureScreenUI::mouseReleaseEvent(QMouseEvent* event)
 {
 	m_bIsMove = false;
 	QMainWindow::mouseReleaseEvent(event);
 }
 
-void QtGuiApplication3::keyPressEvent(QKeyEvent* event)
+void CaptureScreenUI::keyPressEvent(QKeyEvent* event)
 {
 	if (event->key() == Qt::Key_Up)
 	{
@@ -170,7 +182,7 @@ void QtGuiApplication3::keyPressEvent(QKeyEvent* event)
 	QMainWindow::keyPressEvent(event);
 }
 
-void QtGuiApplication3::mouseDoubleClickEvent(QMouseEvent* event)
+void CaptureScreenUI::mouseDoubleClickEvent(QMouseEvent* event)
 {
 	if ((event->buttons() == Qt::LeftButton))
 	{
