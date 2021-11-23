@@ -2,18 +2,17 @@
 #include <QtWin>
 #include <QApplication>
 #include <qdesktopwidget.h>
-
+#include <QMouseEvent>
 #define WIDTH_FREAM 640 //QApplication::desktop()->availableGeometry().width()
 #define HEIGHT_FREAM 640 //QApplication::desktop()->availableGeometry().height()
 
-#define SCREEN_OFF_SETX 200
-#define SCREEN_OFF_SETY 200
-
 QtGuiApplication3::QtGuiApplication3(QWidget* parent)
-	: QMainWindow(parent, Qt::WindowStaysOnTopHint)
+	: QMainWindow(parent, Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint)
 {
 	ui.setupUi(this);
 	connect(this, &QtGuiApplication3::UpdateFream, this, &QtGuiApplication3::Update);
+
+	setStyleSheet("border:1px solid red;");
 
 	__InitDC();
 	__InitBminFo();
@@ -83,9 +82,48 @@ bool QtGuiApplication3::__CaptureRect(const QSize& rect)
 
 	const BOOL blitok = BitBlt(m_hmemdc, 0, 0, rect.width(), rect.height(),
 		m_hrootdc_Desktop,
-		SCREEN_OFF_SETX,
-		SCREEN_OFF_SETY,
+		m_nOffsetX,
+		m_nOffsetY,
 		(CAPTUREBLT | SRCCOPY));
 
 	return blitok ? true : false;
+}
+
+
+bool QtGuiApplication3::__IsPointInDragnWidget(const QWidget* widget, const QPoint& point)
+{
+	//判断位置
+	QRect rect = widget->rect();
+	return widget->geometry().contains(this->mapFromGlobal(QCursor::pos()));
+}
+
+void QtGuiApplication3::mousePressEvent(QMouseEvent* event)
+{
+	m_poPressedPoint = event->pos();		//触发鼠标按压事件的点
+	m_bIsMove = true;
+	QMainWindow::mousePressEvent(event);
+}
+
+void QtGuiApplication3::mouseMoveEvent(QMouseEvent* event)
+{
+	if ((event->buttons() == Qt::LeftButton) && m_bIsMove == true)
+	{
+		QPoint currPoint = this->pos();
+		this->move(currPoint - (m_poPressedPoint - event->pos()));
+	}
+	QMainWindow::mouseMoveEvent(event);
+}
+
+void QtGuiApplication3::mouseReleaseEvent(QMouseEvent* event)
+{
+	m_bIsMove = false;
+	QMainWindow::mouseReleaseEvent(event);
+}
+
+void QtGuiApplication3::mouseDoubleClickEvent(QMouseEvent* event)
+{
+	if ((event->buttons() == Qt::LeftButton))
+	{
+		close();
+	}
 }
