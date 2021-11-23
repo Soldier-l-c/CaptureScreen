@@ -64,5 +64,5 @@ private:
 
 	QPoint m_poPressedPoint;
 	QPoint m_poLastPoint;
-	bool m_bIsMove{ false };
+	std::atomic_bool m_bIsMove{ false };
 };

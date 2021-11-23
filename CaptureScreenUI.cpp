@@ -3,8 +3,23 @@
 #include <QApplication>
 #include <qdesktopwidget.h>
 #include <QMouseEvent>
+
+//#define CAPTURE_MOVED_WITH_MOUSE
+//#define MANGNIFYING
+
+#ifdef CAPTURE_MOVED_WITH_MOUSE
+#define WIDTH_FREAM 100 
+#define HEIGHT_FREAM 20 
+#else
 #define WIDTH_FREAM 640 //QApplication::desktop()->availableGeometry().width()
 #define HEIGHT_FREAM 640 //QApplication::desktop()->availableGeometry().height()
+#endif // CAPTURE_MOVED_WITH_MOUSE
+
+#ifdef MANGNIFYING
+#define MANGINFY_SIZE 8
+#else
+#define MANGINFY_SIZE 1
+#endif // MANGNIFYING
 
 QtGuiApplication3::QtGuiApplication3(QWidget* parent)
 	: QMainWindow(parent, Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint)
@@ -23,6 +38,8 @@ QtGuiApplication3::QtGuiApplication3(QWidget* parent)
 			while (m_bRun)
 			{
 				Sleep(50);
+				if (m_bIsMove)continue;
+
 				__CaptureRect({ WIDTH_FREAM, HEIGHT_FREAM });
 				emit UpdateFream();
 			}
@@ -68,6 +85,9 @@ void QtGuiApplication3::Update()
 		bkPixmap = std::move(QtWin::fromHBITMAP(m_membitmap));
 	}
 
+	QSize picSize(bkPixmap.size() * MANGINFY_SIZE);
+	bkPixmap = bkPixmap.scaled(picSize, Qt::KeepAspectRatio);
+
 	this->resize(bkPixmap.size());
 	QPalette pal(palette());
 	pal.setBrush(QPalette::Window, QBrush(bkPixmap));
@@ -79,11 +99,20 @@ bool QtGuiApplication3::__CaptureRect(const QSize& rect)
 	std::lock_guard<std::mutex>lock(m_mBitMap);
 
 	SelectObject(m_hmemdc, m_membitmap);
+	
+	POINT mousePos;
+	GetCursorPos(&mousePos);
 
 	const BOOL blitok = BitBlt(m_hmemdc, 0, 0, rect.width(), rect.height(),
 		m_hrootdc_Desktop,
+#ifdef CAPTURE_MOVED_WITH_MOUSE
+		(mousePos.x - WIDTH_FREAM/2)> 0 ? (mousePos.x - WIDTH_FREAM / 2) : 0,
+		(mousePos.y - HEIGHT_FREAM/2)> 0 ? (mousePos.y - HEIGHT_FREAM / 2) :0,
+#else 
 		m_nOffsetX,
 		m_nOffsetY,
+#endif // CAPTURE_MOVED_WITH_MOUSE
+
 		(CAPTUREBLT | SRCCOPY));
 
 	return blitok ? true : false;
