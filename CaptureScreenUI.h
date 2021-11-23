@@ -32,12 +32,12 @@ protected:
 	void __InitDC();
 	void __InitBminFo();
 	bool __IsPointInDragnWidget(const QWidget* widget, const QPoint& point);
+
 protected:
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
-
-	//ÉùÃ÷
+	virtual void keyPressEvent(QKeyEvent* event);
 	virtual void mouseDoubleClickEvent(QMouseEvent*) override;
 
 signals:
@@ -58,7 +58,7 @@ private:
 	std::atomic_int32_t m_nOffsetY{ SCREEN_OFF_SETY };
 
 	std::atomic_bool m_bRun{ true };
-	std::shared_ptr<std::thread> m_spThread;
+	std::unique_ptr<std::thread> m_spThread;
 
 	std::mutex m_mBitMap;
 

@@ -17,12 +17,12 @@ QtGuiApplication3::QtGuiApplication3(QWidget* parent)
 	__InitDC();
 	__InitBminFo();
 
-	m_spThread = std::make_shared<std::thread>
+	m_spThread = std::make_unique<std::thread>
 		([this]
 		{
 			while (m_bRun)
 			{
-				Sleep(30);
+				Sleep(50);
 				__CaptureRect({ WIDTH_FREAM, HEIGHT_FREAM });
 				emit UpdateFream();
 			}
@@ -118,6 +118,27 @@ void QtGuiApplication3::mouseReleaseEvent(QMouseEvent* event)
 {
 	m_bIsMove = false;
 	QMainWindow::mouseReleaseEvent(event);
+}
+
+void QtGuiApplication3::keyPressEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_Up)
+	{
+		this->move(this->pos() - QPoint(0, 1));
+	}
+	else if (event->key() == Qt::Key_Down)
+	{
+		this->move(this->pos() - QPoint(0, -1));
+	}
+	else if(event->key() == Qt::Key_Left)
+	{
+		this->move(this->pos() - QPoint(1, 0));
+	}
+	else if (event->key() == Qt::Key_Right)
+	{
+		this->move(this->pos() - QPoint(-1, 0));
+	}
+	QMainWindow::keyPressEvent(event);
 }
 
 void QtGuiApplication3::mouseDoubleClickEvent(QMouseEvent* event)
