@@ -40,7 +40,7 @@ CaptureScreenUI::CaptureScreenUI(QWidget* parent)
 	connect(this, &CaptureScreenUI::UpdateFream, this, &CaptureScreenUI::Update);
 #endif // BUTTON_TO_CAPTURE
 #else
-	connect(this, &QtGuiApplication3::UpdateFream, this, &QtGuiApplication3::Update);
+	connect(this, &CaptureScreenUI::UpdateFream, this, &CaptureScreenUI::Update);
 #endif // ! MANGNIFYING
 
 	__InitDC();
