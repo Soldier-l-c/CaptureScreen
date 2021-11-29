@@ -1,4 +1,6 @@
+#ifdef WIN32
 #include <Windows.h>
+#endif // WIN32
 #include "CaptureScreenUI.h"
 #include <QtWidgets/QApplication>
 

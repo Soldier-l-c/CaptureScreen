@@ -1,5 +1,7 @@
 #include "CaptureScreenUI.h"
+#ifdef WIN32
 #include <QtWin>
+#endif // WIN32
 #include <QApplication>
 #include <qdesktopwidget.h>
 #include <QMouseEvent>
@@ -70,9 +72,11 @@ CaptureScreenUI::~CaptureScreenUI()
 
 void CaptureScreenUI::__InitDC()
 {
+#ifdef WIN32
 	m_hrootdc_Desktop = GetDC(NULL);
 	m_hmemdc = CreateCompatibleDC(m_hrootdc_Desktop);
 	m_membitmap = CreateCompatibleBitmap(m_hrootdc_Desktop, WIDTH_FREAM, HEIGHT_FREAM);
+#endif // WIN32
 }
 
 void CaptureScreenUI::__InitBminFo()
@@ -94,7 +98,9 @@ void CaptureScreenUI::Update()
 	QPixmap bkPixmap;
 	{
 		std::lock_guard<std::mutex>lock(m_mBitMap);
+#ifdef WIN32
 		bkPixmap = std::move(QtWin::fromHBITMAP(m_membitmap));
+#endif // WIN32
 	}
 
 	QSize picSize(bkPixmap.size() * MANGINFY_SIZE);
@@ -110,22 +116,24 @@ bool CaptureScreenUI::__CaptureRect(const QSize& rect)
 {
 	std::lock_guard<std::mutex>lock(m_mBitMap);
 
+#ifdef WIN32
 	SelectObject(m_hmemdc, m_membitmap);
-	
+
 	POINT mousePos;
 	GetCursorPos(&mousePos);
 
 	const BOOL blitok = BitBlt(m_hmemdc, 0, 0, rect.width(), rect.height(),
 		m_hrootdc_Desktop,
 #ifdef CAPTURE_MOVED_WITH_MOUSE
-		(mousePos.x - WIDTH_FREAM/2)> 0 ? (mousePos.x - WIDTH_FREAM / 2) : 0,
-		(mousePos.y - HEIGHT_FREAM/2)> 0 ? (mousePos.y - HEIGHT_FREAM / 2) :0,
+		(mousePos.x - WIDTH_FREAM / 2) > 0 ? (mousePos.x - WIDTH_FREAM / 2) : 0,
+		(mousePos.y - HEIGHT_FREAM / 2) > 0 ? (mousePos.y - HEIGHT_FREAM / 2) : 0,
 #else 
 		m_nOffsetX,
 		m_nOffsetY,
 #endif // CAPTURE_MOVED_WITH_MOUSE
 
 		(CAPTUREBLT | SRCCOPY));
+#endif // WIN32
 
 	return blitok ? true : false;
 }

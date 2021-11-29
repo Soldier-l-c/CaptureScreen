@@ -1,5 +1,7 @@
 #pragma once
+#ifdef WIN32
 #include <windows.h>
+#endif // WIN32
 
 #include <QtWidgets/QMainWindow>
 
