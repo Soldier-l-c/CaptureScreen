@@ -19,10 +19,12 @@ class CaptureScreenUI : public QMainWindow
 
 	using BMInfo = struct 
 	{
+#ifdef WIN32
 		BOOL			truecolour;
 		BITMAPINFO		bmi;
 		// Colormap info - comes straight after BITMAPINFO - **HACK**
 		RGBQUAD			cmap[256];
+#endif
 	};
 
 public:
