@@ -141,14 +141,14 @@ bool CaptureScreenUI::__CaptureRect(const QSize& rect)
 
 bool CaptureScreenUI::__IsPointInDragnWidget(const QWidget* widget, const QPoint& point)
 {
-	//判断位置
+	//鍒ゆ柇浣嶇疆
 	QRect rect = widget->rect();
 	return widget->geometry().contains(this->mapFromGlobal(QCursor::pos()));
 }
 
 void CaptureScreenUI::mousePressEvent(QMouseEvent* event)
 {
-	m_poPressedPoint = event->pos();		//触发鼠标按压事件的点
+	m_poPressedPoint = event->pos();		//瑙﹀彂榧犳爣鎸夊帇浜嬩欢鐨勭偣
 	m_bIsMove = true;
 	QMainWindow::mousePressEvent(event);
 }
