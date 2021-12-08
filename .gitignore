@@ -36,5 +36,6 @@
 Release
 Debug
 Win32
+build
 *.user
 *.aps

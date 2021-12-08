@@ -10,7 +10,6 @@ cmake_minimum_required (VERSION 2.8)
 # 项目信息
 project (CaptureScreen)
 
-
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall -MD -std=c++11 -pthread")
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -std=c++11 -pthread")
 
@@ -24,9 +23,17 @@ message("message $ENV{RAPID_JSON_FOR_LINUX_PIPE_OBJ}")
 include_directories("$ENV{RAPID_JSON_FOR_LINUX_PIPE_OBJ}")
 endif()
 
-include_directories("./Release/uic")
+#设置自动生成moc文件，一定要设置
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
-#QT
+#同理，查找当前文件夹中所有的ui文件
+FILE(GLOB UI_FILES "./*.ui")
+#添加资源文件
+set(RCC_FILES rs.qrc)
+
+#查找需要的Qt库文件，最好每一个库都要写，Qt也会根据依赖关系自动添加
 FIND_PACKAGE(Qt5 COMPONENTS Widgets Core Gui REQUIRED winextras )
 
 
@@ -34,11 +41,16 @@ FIND_PACKAGE(Qt5 COMPONENTS Widgets Core Gui REQUIRED winextras )
 # 并将名称保存到 DIR_SRCS 变量
 aux_source_directory(. DIR_SRCS)
 message("message ${DIR_SRCS}")
-# 指定生成目标,qt项目需要有moc_xxx.cpp,不然会有找不到符号错误
-add_executable(CaptureScreen.app ${DIR_SRCS} ./Release/moc/moc_CaptureScreenUI.cpp)
 
+#通过Ui文件生成对应的头文件，一定要添加
+qt5_wrap_ui(WRAP_FILES ${UI_FILES})
+
+# 指定生成目标
+add_executable(${PROJECT_NAME} ${DIR_SRCS}  ${WRAP_FILES})
+
+#添加Qt5依赖项
 #链接qt 库
-target_link_libraries(CaptureScreen.app 
+target_link_libraries(${PROJECT_NAME}
     Qt5::Widgets 
     Qt5::Core 
     Qt5::Gui
@@ -46,4 +58,4 @@ target_link_libraries(CaptureScreen.app
 
 #连接lib须在指定生成目标之后
 FIND_PACKAGE(Threads)
-TARGET_LINK_LIBRARIES(CaptureScreen.app ${CMAKE_THREAD_LIBS_INIT})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
